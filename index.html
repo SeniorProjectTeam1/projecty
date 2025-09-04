@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Prompt WebApp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea, input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+    .response-box {
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 10px;
+      min-height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Prompt WebApp</h1>
+  <label>OpenAI API Key:</label>
+  <input type="password" id="apiKey" placeholder="Enter your OpenAI API Key" />
+
+  <label>Your Prompt:</label>
+  <textarea id="prompt" rows="5" placeholder="Type your message..."></textarea>
+
+  <button onclick="sendPrompt()">Send to AI</button>
+
+  <h3>Response:</h3>
+  <div id="response" class="response-box"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
