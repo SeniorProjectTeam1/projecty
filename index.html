@@ -90,48 +90,104 @@
     <div id="output" class="space-y-4"></div>
 
     <div class="mt-6 p-4 bg-yellow-800 border border-yellow-400 rounded-lg text-sm">
-      <strong>Hosting note:</strong> Push this file as <code>index.html</code> to GitHub Pages. For production, avoid exposing your API key in-browser; use a backend proxy.
+      <strong>Hosting note:</strong> Push this file as <code>index.html</code> to GitHub Pages. <br/> Warning: entering your API key in-browser exposes it to anyone with access.
     </div>
   </div>
 
 <script>
 function V(id,v){document.getElementById(id).innerText=v}
 
-// Placeholder logic (replace with OpenAI fetch + scoring)
 const output=document.getElementById('output');
 const resultCount=document.getElementById('resultCount');
 let currentTab='ideas';
+let projects=[];
 
-document.getElementById('generate').onclick=()=>{
-  const sample=[
-    {title:"Smart Campus Energy Saver",desc:"IoT devices reduce energy waste.",tags:["iot","sustainability"],scores:{innovation:6,tech:7,resources:5,timeline:4,price:5,market:7}},
-    {title:"AI Tutoring App",desc:"Adaptive learning for students.",tags:["edtech"],scores:{innovation:7,tech:5,resources:4,timeline:6,price:4,market:8}},
-    {title:"Wearable Health Monitor",desc:"Track vitals in real-time.",tags:["health","iot"],scores:{innovation:8,tech:8,resources:6,timeline:5,price:7,market:9}}
-  ];
-  resultCount.textContent=sample.length;
-  render(sample);
+function scoreProject(p,targets){
+  const attrs=["innovation","tech","resources","timeline","price","market"];
+  let total=0;
+  attrs.forEach(a=>{total+=10-Math.abs((p.scores[a]||5)-targets[a]);});
+  return Math.round(total/attrs.length*10);
+}
+
+document.getElementById('generate').onclick=async()=>{
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('Enter API key');return;}
+  const context=document.getElementById('context').value;
+  const category=document.getElementById('category').value;
+  const model=document.getElementById('model').value;
+
+  const targets={
+    innovation:+document.getElementById('innovation').value,
+    tech:+document.getElementById('tech').value,
+    resources:+document.getElementById('resources').value,
+    timeline:+document.getElementById('timeline').value,
+    price:+document.getElementById('price').value,
+    market:+document.getElementById('market').value,
+  };
+
+  output.innerHTML='<p>Generating ideas...</p>';
+
+  const prompt=`Generate 10 unique ECE senior project ideas in category ${category}. ${context||''} Return strict JSON array where each item has: title, desc, tags (array), and scores {innovation, tech, resources, timeline, price, market} (integers 1-10).`;
+
+  try{
+    const res=await fetch("https://api.openai.com/v1/chat/completions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+      body:JSON.stringify({model,messages:[{role:"user",content:prompt}],temperature:0.7})
+    });
+    const data=await res.json();
+    const text=data.choices[0].message.content;
+    let parsed;
+    try{parsed=JSON.parse(text);}catch{parsed=JSON.parse(text.match(/\[[\s\S]*\]/)[0]);}
+    projects=parsed.map(p=>({...p,match:scoreProject(p,targets)}));
+    projects.sort((a,b)=>b.match-a.match);
+    projects=projects.slice(0,3);
+    resultCount.textContent=projects.length;
+    render();
+  }catch(err){
+    output.innerHTML='<p class="text-red-400">Error: '+err+'</p>';
+  }
 };
 
-function render(data){
+function render(){
   output.innerHTML='';
+  if(projects.length===0){output.innerHTML='<p class="text-green-300">No results yet.</p>';return;}
   if(currentTab==='ideas'){
-    data.forEach(p=>{
-      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg'><h3 class='text-xl font-bold mb-2'>${p.title}</h3><p class='text-green-200 mb-2'>${p.desc}</p><div class='flex flex-wrap gap-2 mb-2'>${p.tags.map(t=>`<span class='bg-yellow-400 text-black px-2 py-1 rounded-full text-xs'>${t}</span>`).join('')}</div><div class='text-sm text-green-300'>Innovation: ${p.scores.innovation} | Tech: ${p.scores.tech} | Resources: ${p.scores.resources} | Timeline: ${p.scores.timeline} | Price: ${p.scores.price} | Market: ${p.scores.market}</div></div>`;
+    projects.forEach(p=>{
+      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg'><h3 class='text-xl font-bold mb-2'>${p.title}</h3><p class='text-green-200 mb-2'>${p.desc}</p><div class='flex flex-wrap gap-2 mb-2'>${p.tags.map(t=>`<span class='bg-yellow-400 text-black px-2 py-1 rounded-full text-xs'>${t}</span>`).join('')}</div><div class='text-sm text-green-300'>Innovation: ${p.scores.innovation} | Tech: ${p.scores.tech} | Resources: ${p.scores.resources} | Timeline: ${p.scores.timeline} | Price: ${p.scores.price} | Market: ${p.scores.market} | Match: ${p.match}%</div></div>`;
     });
   } else if(currentTab==='scores'){
-    data.forEach(p=>{
-      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg flex justify-between'><span class='font-bold'>${p.title}</span><span class='text-green-300'>${Object.entries(p.scores).map(([k,v])=>`${k}:${v}`).join(' | ')}</span></div>`;
+    projects.forEach(p=>{
+      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg flex justify-between'><span class='font-bold'>${p.title}</span><span class='text-green-300'>Match: ${p.match}%</span></div>`;
     });
   } else if(currentTab==='onepager'){
-    data.forEach(p=>{
+    projects.forEach(p=>{
       output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg'><h3 class='text-xl font-bold mb-2'>${p.title}</h3><p class='mb-2 text-green-200'>${p.desc}</p><h4 class='font-semibold'>Problem</h4><p class='text-green-200 mb-2'>[Define problem]</p><h4 class='font-semibold'>Users</h4><p class='text-green-200 mb-2'>[Target users]</p><h4 class='font-semibold'>Competitors</h4><p class='text-green-200 mb-2'>[Competitor landscape]</p><h4 class='font-semibold'>Timeline</h4><p class='text-green-200 mb-2'>[Development timeline]</p><h4 class='font-semibold'>Risks</h4><p class='text-green-200 mb-2'>[Risks & challenges]</p><div class='flex flex-wrap gap-2'>${p.tags.map(t=>`<span class='bg-yellow-400 text-black px-2 py-1 rounded-full text-xs'>${t}</span>`).join('')}</div></div>`;
     });
   }
 }
 
 ['tabIdeas','tabScores','tabOnepager'].forEach(id=>{
-  document.getElementById(id).onclick=()=>{currentTab=id==='tabIdeas'?'ideas':id==='tabScores'?'scores':'onepager';render([{title:"Smart Campus Energy Saver",desc:"IoT devices reduce energy waste.",tags:["iot"],scores:{innovation:6,tech:7,resources:5,timeline:4,price:5,market:7}}]);};
+  document.getElementById(id).onclick=()=>{currentTab=id==='tabIdeas'?'ideas':id==='tabScores'?'scores':'onepager';render();};
 });
+
+document.getElementById('clear').onclick=()=>{
+  // reset results
+  output.innerHTML='<p class="text-green-300">No results yet.</p>';
+  projects=[];
+  resultCount.textContent='0';
+
+  // reset inputs
+  document.getElementById('apiKey').value='';
+  document.getElementById('context').value='';
+  document.getElementById('category').selectedIndex=0;
+  document.getElementById('model').selectedIndex=0;
+
+  ['innovation','tech','resources','timeline','price','market'].forEach(id=>{
+    document.getElementById(id).value=5;
+    V(id+"Val",5);
+  });
+};
 </script>
 </body>
 </html>
