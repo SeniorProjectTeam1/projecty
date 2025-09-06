@@ -4,43 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ECE Senior Project Idea Generator</title>
-  <style>
-    :root{--accent:#2563eb;--muted:#666}
-    body{font-family:Inter,Segoe UI,Roboto,Arial;margin:0;padding:20px;background:#f7fafc;color:#0f172a}
-    .container{max-width:1100px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;box-shadow:0 6px 18px rgba(16,24,40,.08)}
-    h1{margin:0 0 12px}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .col{flex:1 1 240px;min-width:220px}
-    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-    input[type=text],select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eef8}
-    input[type=range]{width:100%}
-    .slwrap{background:#f1f5f9;padding:10px;border-radius:8px}
-    button{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
-    .mutebtn{background:#eef2ff;color:#1e293b}
-    .selector{display:flex;gap:8px;margin-top:12px}
-    .tile{border-radius:8px;padding:10px;border:1px solid #e6eef8;background:#fff}
-    .list{margin-top:12px}
-    .project{border-radius:8px;padding:10px;border:1px solid #eef2ff;margin-bottom:10px;background:#fcfeff}
-    .chip{display:inline-block;padding:4px 8px;border-radius:20px;background:#eef2ff;margin-right:6px;margin-bottom:6px;font-size:12px}
-    .warning{background:#fff7ed;padding:10px;border-radius:8px;border:1px solid #f1c27d}
-    pre{white-space:pre-wrap}
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>ECE Senior Project Idea Generator</h1>
-    <p style="margin-top:0;color:var(--muted)">Enter an AI API key (or use a proxy server) and set criteria. Click <strong>Generate</strong> to get 10 project ideas; the app will score them and show the top 3.</p>
+<body class="bg-green-900 text-white min-h-screen p-6">
+  <div class="max-w-5xl mx-auto bg-green-800 rounded-2xl shadow-lg p-6">
+    <h1 class="text-3xl font-bold mb-4">ECE Senior Project Idea Generator</h1>
+    <p class="text-green-200 mb-6">Enter your API key, select criteria, and generate 10 project ideas. The app will score them and display the top 3.</p>
 
-    <div class="row">
-      <div class="col tile">
-        <label>AI API Key (paste here) — <small style="color:var(--muted)">⚠️ exposing your key client-side is insecure. Use a proxy/backend for production.</small></label>
-        <input id="apiKey" type="text" placeholder="sk-..." />
+    <!-- API Key & Context -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div>
+        <label class="block text-sm mb-1">AI API Key</label>
+        <input id="apiKey" type="text" placeholder="sk-..." class="w-full p-2 rounded-lg bg-green-700 border border-green-500" />
 
-        <label style="margin-top:10px">Topic context (optional)</label>
-        <textarea id="context" rows="3" placeholder="Optional: narrow requirements, university constraints, hardware available..."></textarea>
+        <label class="block text-sm mt-4 mb-1">Topic Context (optional)</label>
+        <textarea id="context" rows="3" placeholder="Optional: narrow requirements..." class="w-full p-2 rounded-lg bg-green-700 border border-green-500"></textarea>
+      </div>
 
-        <label style="margin-top:10px">Category</label>
-        <select id="category">
+      <div>
+        <label class="block text-sm mb-1">Category</label>
+        <select id="category" class="w-full p-2 rounded-lg bg-green-700 border border-green-500">
           <option value="edtech">EdTech</option>
           <option value="iot">IoT / Embedded</option>
           <option value="health">Health</option>
@@ -49,255 +32,106 @@
           <option value="campus">Campus Life</option>
         </select>
 
-        <label style="margin-top:10px">Model</label>
-        <select id="model">
+        <label class="block text-sm mt-4 mb-1">Model</label>
+        <select id="model" class="w-full p-2 rounded-lg bg-green-700 border border-green-500">
           <option value="gpt-4o">gpt-4o</option>
           <option value="gpt-4o-mini">gpt-4o-mini</option>
-          <option value="gpt-4o-realtime">gpt-4o-realtime</option>
           <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
         </select>
+      </div>
+    </div>
 
+    <!-- Sliders -->
+    <div class="grid md:grid-cols-3 gap-6 mb-6">
+      <div>
+        <label class="block text-sm mb-1">Innovation (1 practical — 10 radical)</label>
+        <input type="range" id="innovation" min="1" max="10" value="5" class="w-full" oninput="V('innovationVal',this.value)" />
+        <div id="innovationVal" class="mt-1 text-green-300">5</div>
+
+        <label class="block text-sm mt-4 mb-1">Tech skill (1 low — 10 high)</label>
+        <input type="range" id="tech" min="1" max="10" value="5" class="w-full" oninput="V('techVal',this.value)" />
+        <div id="techVal" class="mt-1 text-green-300">5</div>
+
+        <label class="block text-sm mt-4 mb-1">Resources (1 few — 10 a lot)</label>
+        <input type="range" id="resources" min="1" max="10" value="5" class="w-full" oninput="V('resourcesVal',this.value)" />
+        <div id="resourcesVal" class="mt-1 text-green-300">5</div>
       </div>
 
-      <div class="col tile">
-        <label>Innovation (1 practical — 10 radical)</label>
-        <div class="slwrap"><input type="range" id="innovation" min="1" max="10" value="6" oninput="V('innovationVal',this.value)"/></div>
-        <div style="text-align:right;font-size:12px;color:var(--muted)" id="innovationVal">6</div>
+      <div>
+        <label class="block text-sm mb-1">Timeline speed (1 slow — 10 fast)</label>
+        <input type="range" id="timeline" min="1" max="10" value="5" class="w-full" oninput="V('timelineVal',this.value)" />
+        <div id="timelineVal" class="mt-1 text-green-300">5</div>
 
-        <label style="margin-top:10px">Tech skill level (1 low — 10 high)</label>
-        <div class="slwrap"><input type="range" id="tech" min="1" max="10" value="7" oninput="V('techVal',this.value)"/></div>
-        <div style="text-align:right;font-size:12px;color:var(--muted)" id="techVal">7</div>
+        <label class="block text-sm mt-4 mb-1">Price (1 low — 10 high)</label>
+        <input type="range" id="price" min="1" max="10" value="5" class="w-full" oninput="V('priceVal',this.value)" />
+        <div id="priceVal" class="mt-1 text-green-300">5</div>
 
-        <label style="margin-top:10px">Resources (1 few — 10 a lot)</label>
-        <div class="slwrap"><input type="range" id="resources" min="1" max="10" value="5" oninput="V('resourcesVal',this.value)"/></div>
-        <div style="text-align:right;font-size:12px;color:var(--muted)" id="resourcesVal">5</div>
+        <label class="block text-sm mt-4 mb-1">Market strength (1 weak — 10 strong)</label>
+        <input type="range" id="market" min="1" max="10" value="5" class="w-full" oninput="V('marketVal',this.value)" />
+        <div id="marketVal" class="mt-1 text-green-300">5</div>
       </div>
-
-      <div class="col tile">
-        <label>Timeline speed (1 slow — 10 fast)</label>
-        <div class="slwrap"><input type="range" id="timeline" min="1" max="10" value="5" oninput="V('timelineVal',this.value)"/></div>
-        <div style="text-align:right;font-size:12px;color:var(--muted)" id="timelineVal">5</div>
-
-        <label style="margin-top:10px">Price (1 low — 10 high)</label>
-        <div class="slwrap"><input type="range" id="price" min="1" max="10" value="4" oninput="V('priceVal',this.value)"/></div>
-        <div style="text-align:right;font-size:12px;color:var(--muted)" id="priceVal">4</div>
-
-        <label style="margin-top:10px">Market strength (1 weak — 10 strong)</label>
-        <div class="slwrap"><input type="range" id="market" min="1" max="10" value="6" oninput="V('marketVal',this.value)"/></div>
-        <div style="text-align:right;font-size:12px;color:var(--muted)" id="marketVal">6</div>
-      </div>
-
     </div>
 
-    <div style="display:flex;align-items:center;gap:8px;margin-top:14px">
-      <button id="generate">Generate 10 ideas & score</button>
-      <button class="mutebtn" id="clear">Clear</button>
-      <div style="margin-left:auto;color:var(--muted);font-size:13px">Results: <span id="resultCount">0</span></div>
+    <!-- Buttons -->
+    <div class="flex items-center gap-4 mb-6">
+      <button id="generate" class="bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg">Generate Ideas</button>
+      <button id="clear" class="bg-green-700 border border-green-500 px-4 py-2 rounded-lg">Clear</button>
+      <div class="ml-auto text-green-200 text-sm">Results: <span id="resultCount">0</span></div>
     </div>
 
-    <div class="selector">
-      <button id="tabIdeas" class="mutebtn">Ideas</button>
-      <button id="tabScores" class="mutebtn">Scores</button>
-      <button id="tabOnepager" class="mutebtn">One-pager</button>
+    <!-- Selector Bar -->
+    <div class="flex gap-2 mb-4">
+      <button id="tabIdeas" class="bg-green-700 border border-green-500 px-4 py-2 rounded-lg">Ideas</button>
+      <button id="tabScores" class="bg-green-700 border border-green-500 px-4 py-2 rounded-lg">Scores</button>
+      <button id="tabOnepager" class="bg-green-700 border border-green-500 px-4 py-2 rounded-lg">One-pager</button>
     </div>
 
-    <div id="output" class="list" style="margin-top:12px"></div>
+    <!-- Output -->
+    <div id="output" class="space-y-4"></div>
 
-    <div style="margin-top:12px" class="warning">
-      <strong>Hosting note:</strong> push this file as <code>index.html</code> to a GitHub repo's <code>gh-pages</code> branch (or enable GitHub Pages from main branch). For production, avoid putting your OpenAI key in the browser — use a small server-side proxy that injects your key.
+    <div class="mt-6 p-4 bg-yellow-800 border border-yellow-400 rounded-lg text-sm">
+      <strong>Hosting note:</strong> Push this file as <code>index.html</code> to GitHub Pages. For production, avoid exposing your API key in-browser; use a backend proxy.
     </div>
-
   </div>
 
 <script>
-// helper to set visible value
 function V(id,v){document.getElementById(id).innerText=v}
 
-function getInputs(){
-  return {
-    apiKey: document.getElementById('apiKey').value.trim(),
-    context: document.getElementById('context').value.trim(),
-    category: document.getElementById('category').value,
-    model: document.getElementById('model').value,
-    innovation: +document.getElementById('innovation').value,
-    tech: +document.getElementById('tech').value,
-    resources: +document.getElementById('resources').value,
-    timeline: +document.getElementById('timeline').value,
-    price: +document.getElementById('price').value,
-    market: +document.getElementById('market').value
+// Placeholder logic (replace with OpenAI fetch + scoring)
+const output=document.getElementById('output');
+const resultCount=document.getElementById('resultCount');
+let currentTab='ideas';
+
+document.getElementById('generate').onclick=()=>{
+  const sample=[
+    {title:"Smart Campus Energy Saver",desc:"IoT devices reduce energy waste.",tags:["iot","sustainability"],scores:{innovation:6,tech:7,resources:5,timeline:4,price:5,market:7}},
+    {title:"AI Tutoring App",desc:"Adaptive learning for students.",tags:["edtech"],scores:{innovation:7,tech:5,resources:4,timeline:6,price:4,market:8}},
+    {title:"Wearable Health Monitor",desc:"Track vitals in real-time.",tags:["health","iot"],scores:{innovation:8,tech:8,resources:6,timeline:5,price:7,market:9}}
+  ];
+  resultCount.textContent=sample.length;
+  render(sample);
+};
+
+function render(data){
+  output.innerHTML='';
+  if(currentTab==='ideas'){
+    data.forEach(p=>{
+      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg'><h3 class='text-xl font-bold mb-2'>${p.title}</h3><p class='text-green-200 mb-2'>${p.desc}</p><div class='flex flex-wrap gap-2 mb-2'>${p.tags.map(t=>`<span class='bg-yellow-400 text-black px-2 py-1 rounded-full text-xs'>${t}</span>`).join('')}</div><div class='text-sm text-green-300'>Innovation: ${p.scores.innovation} | Tech: ${p.scores.tech} | Resources: ${p.scores.resources} | Timeline: ${p.scores.timeline} | Price: ${p.scores.price} | Market: ${p.scores.market}</div></div>`;
+    });
+  } else if(currentTab==='scores'){
+    data.forEach(p=>{
+      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg flex justify-between'><span class='font-bold'>${p.title}</span><span class='text-green-300'>${Object.entries(p.scores).map(([k,v])=>`${k}:${v}`).join(' | ')}</span></div>`;
+    });
+  } else if(currentTab==='onepager'){
+    data.forEach(p=>{
+      output.innerHTML+=`<div class='p-4 bg-green-700 rounded-lg'><h3 class='text-xl font-bold mb-2'>${p.title}</h3><p class='mb-2 text-green-200'>${p.desc}</p><h4 class='font-semibold'>Problem</h4><p class='text-green-200 mb-2'>[Define problem]</p><h4 class='font-semibold'>Users</h4><p class='text-green-200 mb-2'>[Target users]</p><h4 class='font-semibold'>Competitors</h4><p class='text-green-200 mb-2'>[Competitor landscape]</p><h4 class='font-semibold'>Timeline</h4><p class='text-green-200 mb-2'>[Development timeline]</p><h4 class='font-semibold'>Risks</h4><p class='text-green-200 mb-2'>[Risks & challenges]</p><div class='flex flex-wrap gap-2'>${p.tags.map(t=>`<span class='bg-yellow-400 text-black px-2 py-1 rounded-full text-xs'>${t}</span>`).join('')}</div></div>`;
+    });
   }
 }
 
-// Build prompt asking for strict JSON
-function buildPrompt(inputs){
-  const instr = `You are an assistant that returns exactly a JSON array named \"projects\" containing 10 project objects that match the requested criteria. Don't print any extra text. Each project object must have these fields: title (string), tags (array of short tags), innovation (1-10 integer), tech (1-10 integer), resources (1-10 integer), timeline (1-10 integer), price (1-10 integer), market (1-10 integer), shortDesc (string 1-2 sentences), problem (1-2 sentences), users (comma-separated string), competitors (brief list or empty), timelinePlan (short list), risks (short list). Use the category provided. Use topic context if given. Make answers concise and graduate-level appropriate for an ECE senior project. Limit tag list to 4 tags.`
-
-  const user = `Category: ${inputs.category}\nInnovation target: ${inputs.innovation}\nTech target: ${inputs.tech}\nResources target: ${inputs.resources}\nTimeline speed target: ${inputs.timeline}\nPrice target: ${inputs.price}\nMarket strength target: ${inputs.market}\nContext: ${inputs.context || 'none'}`
-  return instr + "\n\n" + user + "\n\nReturn the JSON only.";
-}
-
-// Call OpenAI Chat Completions API (browser). Note: exposing key client-side is insecure.
-async function callOpenAI(apiKey, model, prompt){
-  // NOTE: If you're using a proxy, point 'url' to your proxy endpoint instead.
-  const url = 'https://api.openai.com/v1/chat/completions';
-  const body = {
-    model: model,
-    messages: [
-      {role: 'system', content: 'You are a helpful assistant that outputs strict JSON as requested.'},
-      {role: 'user', content: prompt}
-    ],
-    temperature: 0.2,
-    max_tokens: 1200
-  };
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + apiKey
-    },
-    body: JSON.stringify(body)
-  });
-  if(!res.ok){
-    const txt = await res.text();
-    throw new Error('OpenAI error: ' + res.status + ' ' + txt);
-  }
-  const j = await res.json();
-  const txt = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-  return txt;
-}
-
-// Try to extract JSON array from model output robustly
-function extractJSON(text){
-  if(!text) return null;
-  const start = text.indexOf('[');
-  if(start===-1) return null;
-  const sub = text.slice(start);
-  try{
-    return JSON.parse(sub);
-  }catch(e){
-    let depth=0;let endIdx=-1;
-    for(let i=0;i<sub.length;i++){
-      if(sub[i]==='[') depth++;
-      if(sub[i]===']'){ depth--; if(depth===0){ endIdx = i; break; }}
-    }
-    if(endIdx===-1) return null;
-    const candidate = sub.slice(0,endIdx+1);
-    try{ return JSON.parse(candidate);}catch(e2){return null}
-  }
-}
-
-function scoreProject(project, target){
-  const attrs = ['innovation','tech','resources','timeline','price','market'];
-  let total=0; let n=0; const details={};
-  attrs.forEach(a=>{
-    const p = clampInt(project[a],1,10);
-    const t = clampInt(target[a],1,10);
-    const s = Math.max(0,10 - Math.abs(t - p));
-    details[a]=s;
-    total += s; n++;
-  });
-  const normalized = Math.round((total / (n*10)) * 100);
-  return {raw:total, percent:normalized, details};
-}
-
-function clampInt(v,min,max){
-  const n = parseInt(v) || 0; return Math.max(min, Math.min(max,n));
-}
-
-function renderIdeas(projects, scores){
-  const out = document.getElementById('output'); out.innerHTML='';
-  document.getElementById('resultCount').innerText = projects.length;
-  projects.forEach((p,i)=>{
-    const div = document.createElement('div'); div.className='project';
-    div.innerHTML = `<strong>${i+1}. ${escapeHtml(p.title)}</strong><div style="margin-top:6px">${p.tags.map(t=>'<span class="chip">'+escapeHtml(t)+'</span>').join('')}</div>
-    <div style="margin-top:8px;font-size:13px;color:var(--muted)">${escapeHtml(p.shortDesc||'')}</div>
-    <div style="margin-top:8px">Innovation: ${p.innovation} | Tech: ${p.tech} | Resources: ${p.resources} | Timeline: ${p.timeline} | Price: ${p.price} | Market: ${p.market}</div>
-    <div style="margin-top:6px;color:var(--muted);font-size:13px">Score: ${scores[i].percent}%</div>`;
-    out.appendChild(div);
-  });
-}
-
-function renderScores(projects,scores){
-  const out = document.getElementById('output'); out.innerHTML='';
-  projects.forEach((p,i)=>{
-    const div = document.createElement('div'); div.className='project';
-    const d = scores[i].details;
-    div.innerHTML = `<strong>${i+1}. ${escapeHtml(p.title)}</strong> — ${scores[i].percent}%<div style="margin-top:6px">${Object.entries(d).map(([k,v])=>`<span class="chip">${k}: ${v}</span>`).join(' ')}</div>`;
-    out.appendChild(div);
-  });
-}
-
-function renderOnepagers(projects, scores){
-  const out = document.getElementById('output'); out.innerHTML='';
-  const order = projects.map((p,i)=>({p,score:scores[i].percent,idx:i})).sort((a,b)=>b.score-a.score).slice(0,3);
-  order.forEach((o,rank)=>{
-    const p = o.p; const div = document.createElement('div'); div.className='project';
-    div.innerHTML = `<h3>${rank+1}. ${escapeHtml(p.title)} <small style="color:var(--muted)">(${o.score}%)</small></h3>
-      <div style="font-size:14px;margin-top:6px">${escapeHtml(p.shortDesc||'')}</div>
-      <hr />
-      <strong>Problem</strong><div>${escapeHtml(p.problem||'')}</div>
-      <strong>Users</strong><div>${escapeHtml(p.users||'')}</div>
-      <strong>Competitors</strong><div>${escapeHtml((p.competitors && p.competitors.length)?p.competitors.join(', '):'None')}</div>
-      <strong>Timeline plan</strong><div>${Array.isArray(p.timelinePlan)?'<ul>'+p.timelinePlan.map(s=>'<li>'+escapeHtml(s)+'</li>').join('')+'</ul>':escapeHtml(p.timelinePlan||'')}</div>
-      <strong>Risks</strong><div>${Array.isArray(p.risks)?'<ul>'+p.risks.map(s=>'<li>'+escapeHtml(s)+'</li>').join('')+'</ul>':escapeHtml(p.risks||'')}</div>
-      <div style="margin-top:8px">${p.tags.map(t=>'<span class="chip">'+escapeHtml(t)+'</span>').join('')}</div>`;
-    out.appendChild(div);
-  });
-}
-
-function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-let lastProjects = [];
-let lastScores = [];
-
-document.getElementById('tabIdeas').onclick = ()=>{ if(!lastProjects.length){ document.getElementById('output').innerHTML='<em style="color:var(--muted)">No results yet — generate first.</em>'; return;} renderIdeas(lastProjects,lastScores); };
-document.getElementById('tabScores').onclick = ()=>{ if(!lastProjects.length){ document.getElementById('output').innerHTML='<em style="color:var(--muted)">No results yet — generate first.</em>'; return;} renderScores(lastProjects,lastScores); };
-document.getElementById('tabOnepager').onclick = ()=>{ if(!lastProjects.length){ document.getElementById('output').innerHTML='<em style="color:var(--muted)">No results yet — generate first.</em>'; return;} renderOnepagers(lastProjects,lastScores); };
-
-document.getElementById('clear').onclick = ()=>{ document.getElementById('output').innerHTML=''; lastProjects=[]; lastScores=[]; document.getElementById('resultCount').innerText='0'; }
-
-document.getElementById('generate').onclick = async ()=>{
-  const inputs = getInputs();
-  document.getElementById('output').innerHTML = '<em style="color:var(--muted)">Generating... (may take a few seconds)</em>';
-  try{
-    if(!inputs.apiKey){ throw new Error('Please paste an API key (or use a proxy that injects it server-side).'); }
-    const prompt = buildPrompt(inputs);
-    const raw = await callOpenAI(inputs.apiKey, inputs.model, prompt);
-    const arr = extractJSON(raw);
-    if(!arr || !Array.isArray(arr)) throw new Error('Could not parse model output as JSON array. Response: ' + (raw||'[empty]'));
-    const projects = arr.slice(0,10).map((it)=>({
-      title: it.title||'Untitled',
-      tags: Array.isArray(it.tags)?it.tags:[],
-      innovation: clampInt(it.innovation||it.innovation,1,10),
-      tech: clampInt(it.tech||it.tech,1,10),
-      resources: clampInt(it.resources||it.resources,1,10),
-      timeline: clampInt(it.timeline||it.timeline,1,10),
-      price: clampInt(it.price||it.price,1,10),
-      market: clampInt(it.market||it.market,1,10),
-      shortDesc: it.shortDesc||it.description||'',
-      problem: it.problem||'',
-      users: it.users||'',
-      competitors: Array.isArray(it.competitors)?it.competitors:(it.competitors?String(it.competitors).split(',').map(s=>s.trim()):[]),
-      timelinePlan: Array.isArray(it.timelinePlan)?it.timelinePlan:(it.timelinePlan?String(it.timelinePlan).split(';').map(s=>s.trim()):[]),
-      risks: Array.isArray(it.risks)?it.risks:(it.risks?String(it.risks).split(';').map(s=>s.trim()):[])
-    }));
-
-    const target = {innovation:inputs.innovation, tech:inputs.tech, resources:inputs.resources, timeline:inputs.timeline, price:inputs.price, market:inputs.market};
-    const scores = projects.map(p=>scoreProject(p,target));
-
-    const order = projects.map((p,i)=>({p,scores:scores[i]})).sort((a,b)=>b.scores.percent - a.scores.percent);
-    lastProjects = order.map(o=>o.p);
-    lastScores = order.map(o=>o.scores);
-
-    renderIdeas(lastProjects,lastScores);
-
-  }catch(err){
-    document.getElementById('output').innerHTML = '<div style="color:#b91c1c">Error: '+escapeHtml(err.message||err)+'</div>';
-    console.error(err);
-  }
-}
-
+['tabIdeas','tabScores','tabOnepager'].forEach(id=>{
+  document.getElementById(id).onclick=()=>{currentTab=id==='tabIdeas'?'ideas':id==='tabScores'?'scores':'onepager';render([{title:"Smart Campus Energy Saver",desc:"IoT devices reduce energy waste.",tags:["iot"],scores:{innovation:6,tech:7,resources:5,timeline:4,price:5,market:7}}]);};
+});
 </script>
 </body>
 </html>
