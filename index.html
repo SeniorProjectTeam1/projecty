@@ -32,7 +32,7 @@
   <div class="w-full max-w-7xl mx-auto p-6 space-y-6">
     <div class="gradient-bg text-white p-8 rounded-2xl card-shadow">
       <div class="flex items-center justify-center space-x-4">
-        <i class="fas fa-smile text-3xl"style="color:yellow;"></i>
+        <i class="fas fa-smile text-3xl" style="color:yellow;"></i>
         <h1 class="text-3xl md:text-4xl font-bold">Projecty</h1>
       </div>
       <p class="text-center mt-3 opacity-90">Project Recommendation Engine for Capstone Topics, Yay!</p>
@@ -138,7 +138,6 @@
         document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
         document.getElementById('aiModel').addEventListener('change', e=>this.model=e.target.value);
 
-        // Update slider values
         ['innovation','techSkill','resources','timeline','price','market'].forEach(id=>{
           document.getElementById(id).addEventListener('input', e=>{
             document.getElementById(id+'Val').textContent=e.target.value;
@@ -154,7 +153,6 @@
         this.projects = [];
         const tech = document.getElementById('techSelect').value;
 
-        // Collect weights
         const weights = {
           Innovation: document.getElementById('innovation').value,
           TechSkill: document.getElementById('techSkill').value,
@@ -232,7 +230,6 @@ Use the selected technology if provided: ${tech}.
             categoryHtml += `<div class="category"><i class="category-icon ${icons[cat]||'fas fa-tag'}"></i><div><strong>${cat}:</strong> ${this.escapeHtml(content)}</div></div>`;
           });
 
-          // Weights as tags
           let tagsHtml = Object.entries(weights).map(([k,v])=>
             `<span class="tag bg-green-600">${k}: ${v}</span>`
           ).join('');
@@ -273,7 +270,11 @@ Unique value: ${p.categories['Unique value']}
 Include: Top competitors, target users, and risks.
 Return plain text.`;
 
-              const res = await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},body:JSON.stringify({model:this.model,messages:[{role:'user',content:prompt}],temperature:0.6,max_tokens:400})});
+              const res = await fetch('https://api.openai.com/v1/chat/completions',{
+                method:'POST',
+                headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},
+                body:JSON.stringify({model:this.model,messages:[{role:'user',content:prompt}],temperature:0.6,max_tokens:400})
+              });
               if(!res.ok){ throw new Error(await res.text()); }
               const data = await res.json();
               marketDiv.textContent = data.choices[0].message.content || 'No analysis returned.';
@@ -282,7 +283,15 @@ Return plain text.`;
         });
       }
 
-      escapeHtml(str){ return (str||'').replace(/[&<>"'`]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','`':'&#96;'}[s])); }
+      escapeHtml(input){
+        let str;
+        if (typeof input === 'string') str = input;
+        else if (Array.isArray(input)) str = input.join(', ');
+        else if (typeof input === 'object' && input !== null) str = JSON.stringify(input);
+        else str = String(input);
+        return str.replace(/[&<>"'`]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','`':'&#96;'}[s]));
+      }
+
       showLoading(){ document.getElementById('loadingMessage').classList.remove('hidden'); }
       hideLoading(){ document.getElementById('loadingMessage').classList.add('hidden'); }
       showError(msg){ const e=document.getElementById('errorMessage'); e.textContent=msg; e.classList.remove('hidden'); }
