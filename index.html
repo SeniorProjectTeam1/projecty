@@ -1,78 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="transition-colors duration-500">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI-Powered Senior Project Ideation</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    * { font-family: 'Inter', sans-serif; }
-    .gradient-bg { background: linear-gradient(135deg,#13da97 0%,#0495a8 100%); }
-    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
-    .btn-primary { background: linear-gradient(135deg,#016a32 0%,#064e3b 100%); transition: all .18s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow:0 8px 20px rgba(1,106,50,0.18); }
-    .innovation-slider { -webkit-appearance:none; appearance:none; height:8px; border-radius:6px; background:#e6f4ea; outline:none; }
-    .innovation-slider::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#10b981; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.12); }
+    body { font-family: 'Inter', sans-serif; }
+    .card-shadow { @apply shadow-lg; }
+    .btn-primary { @apply bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:scale-105 transition-transform; }
+    .innovation-slider::-webkit-slider-thumb { @apply bg-green-500; }
     .loading-spinner { border:4px solid #f3f3f3; border-top:4px solid #10b981; border-radius:50%; width:26px; height:26px; animation:spin 1s linear infinite; }
     @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
-    .project-card { border-left:4px solid #10b981; transition:all .18s ease; }
-    .project-card:hover { transform: translateY(-4px); box-shadow:0 15px 30px -10px rgba(0,0,0,0.08); }
-    .category { display:flex; align-items:flex-start; margin-top:0.5rem; }
-    .category-icon { width:20px; min-width:20px; text-align:center; margin-right:8px; color:#10b981; }
-    .market-data { white-space:pre-wrap; }
-    .hidden { display:none; }
-    .tag { display:inline-block; padding:2px 8px; margin:2px; border-radius:6px; font-size:0.75rem; font-weight:500; color:white; }
+
+    /* Tabs theming */
+    #tabsContainer {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    #tabsContainer::-webkit-scrollbar { height: 6px; }
+    #tabsContainer::-webkit-scrollbar-thumb { background: #10b981; border-radius: 3px; }
+    .tab {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #e5e7eb; /* light gray */
+      color: #111827;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .tab.active { background: #10b981; color: white; }
+    .tab .close-btn { cursor: pointer; font-weight: bold; }
+    .tabContent { margin-top: 8px; }
+    .project-card { transition: transform 0.2s; }
+    .project-card:hover { transform: translateY(-2px); }
+    .category { margin-bottom: 6px; display: flex; align-items: flex-start; gap: 6px; }
+    .category-icon { min-width: 20px; }
+    .tag { display:inline-block; padding:2px 6px; border-radius:4px; color:white; font-size:0.75rem; margin-right:4px; margin-bottom:2px; }
+    .market-data { transition: all 0.2s; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <div class="w-full max-w-7xl mx-auto p-6 space-y-6">
-    <div class="gradient-bg text-white p-8 rounded-2xl card-shadow">
-      <div class="flex items-center justify-center space-x-4">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500">
+  <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 md:p-8 rounded-2xl card-shadow">
+      <div class="flex items-center space-x-4">
         <i class="fas fa-smile text-3xl" style="color:yellow;"></i>
-        <h1 class="text-3xl md:text-4xl font-bold">Projecty</h1>
+        <h1 class="text-3xl md:text-4xl font-bold">
+          Projecty 
+          <p class="text-center text-sm md:text-base opacity-90">Project Recommendation Engine for Capstone Topics</p>
+        </h1>
       </div>
-      <p class="text-center mt-3 opacity-90">Project Recommendation Engine for Capstone Topics, Yay!</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Config Panel -->
-      <div class="lg:col-span-1 space-y-6">
-        <div class="bg-white p-6 rounded-xl card-shadow">
-          <h2 class="text-xl font-semibold mb-4"><i class="fas fa-cog text-blue-600 mr-2"></i>Configuration</h2>
-          <div class="space-y-3">
-            <label class="text-sm font-medium">OpenAI API Key</label>
-            <input id="apiKey" type="password" placeholder="sk-..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-600" />
-            <label class="text-sm font-medium mt-2">Preferred Technologies</label>
-            <select id="techSelect" class="w-full p-3 border rounded-lg">
-              <option value="">Any</option>
-              <option>edtech</option>
-              <option>iot/embedded</option>
-              <option>health</option>
-              <option>fintech</option>
-              <option>sustainability</option>
-              <option>campus life</option>
-            </select>
-            <label class="text-sm font-medium mt-2">Model</label>
-            <select id="aiModel" class="w-full p-3 border rounded-lg">
-              <option value="gpt-4o-mini">gpt-4o-mini</option>
-              <option value="gpt-4o">gpt-4o</option>
-              <option value="gpt-4">gpt-4</option>
-              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-            </select>
-          </div>
+    <!-- Panels -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Configuration Panel -->
+      <div>
+        <div class="flex justify-between items-center p-4 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer" onclick="toggleCollapse('configContent','configIcon')">
+          <h2 class="text-xl font-semibold"><i class="fas fa-cog text-blue-600 mr-2"></i>Configuration</h2>
+          <i id="configIcon" class="fas fa-chevron-up"></i>
         </div>
+        <div id="configContent" class="bg-white dark:bg-gray-800 p-6 rounded-xl card-shadow mt-2 space-y-3">
+          <label class="text-sm font-medium">OpenAI API Key</label>
+          <input id="apiKey" type="password" placeholder="sk-..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
 
-        <div class="bg-white p-6 rounded-xl card-shadow">
-          <h2 class="text-xl font-semibold mb-4"><i class="fas fa-sliders-h text-green-600 mr-2"></i>Project Parameters</h2>
-          <div class="space-y-4">
-            <label class="text-sm font-medium">Topic context (optional)</label>
-            <textarea id="topicContext" rows="2" placeholder="Extra constraints or context" class="w-full p-3 border rounded-lg"></textarea>
+          <label class="text-sm font-medium">Preferred Technologies</label>
+          <select id="techSelect" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <option value="">Any</option>
+            <option>edtech</option>
+            <option>iot/embedded</option>
+            <option>health</option>
+            <option>fintech</option>
+            <option>sustainability</option>
+            <option>campus life</option>
+          </select>
 
-            <!-- Sliders -->
+          <label class="text-sm font-medium">Model</label>
+          <select id="aiModel" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <option value="gpt-4o-mini">gpt-4o-mini</option>
+            <option value="gpt-4o">gpt-4o</option>
+            <option value="gpt-4">gpt-4</option>
+            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Project Parameters Panel -->
+      <div>
+        <div class="flex justify-between items-center p-4 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer" onclick="toggleCollapse('paramsContent','paramsIcon')">
+          <h2 class="text-xl font-semibold"><i class="fas fa-sliders-h text-green-600 mr-2"></i>Project Parameters</h2>
+          <i id="paramsIcon" class="fas fa-chevron-up"></i>
+        </div>
+        <div id="paramsContent" class="bg-white dark:bg-gray-800 p-6 rounded-xl card-shadow mt-2 space-y-3">
+          <label class="text-sm font-medium">Topic context (optional)</label>
+          <textarea id="topicContext" rows="2" placeholder="Extra constraints or context" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+
+          <!-- Sliders -->
+          <div class="space-y-3">
             <div>
               <label class="block text-sm">Innovation <span id="innovationVal" class="font-bold">5</span></label>
               <input id="innovation" type="range" min="1" max="10" value="5" class="w-full innovation-slider">
@@ -97,74 +134,88 @@
               <label class="block text-sm">Market Strength <span id="marketVal" class="font-bold">5</span></label>
               <input id="market" type="range" min="1" max="10" value="5" class="w-full innovation-slider">
             </div>
+          </div>
 
-            <div class="flex gap-2 mt-3">
-              <button id="generateBtn" class="btn-primary text-white py-2 px-4 rounded-lg flex-1 flex items-center justify-center gap-2">
-                <i class="fas fa-magic"></i> Generate
-              </button>
-              <button id="clearBtn" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg flex-1 hover:bg-gray-300">
-                <i class="fas fa-trash"></i> Clear
-              </button>
-            </div>
+          <div class="flex gap-2 mt-3">
+            <button id="generateBtn" class="btn-primary flex-1 flex items-center justify-center gap-2">
+              <i class="fas fa-magic "></i> Generate
+            </button>
+            <button id="clearBtn" class="flex-1 py-2 px-4 bg-gray-300 dark:bg-gray-700 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 flex items-center justify-center gap-2">
+              <i class="fas fa-trash"></i> Clear
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Results Panel -->
-      <div class="lg:col-span-2">
-        <div id="loadingMessage" class="hidden bg-white p-6 rounded-xl card-shadow mb-4 flex items-center gap-3">
-          <div class="loading-spinner"></div>
-          <span class="font-medium">Generating project ideas...</span>
-        </div>
-
-        <div id="errorMessage" class="hidden bg-red-100 text-red-700 p-4 rounded-lg mb-4"></div>
-
-        <div id="resultsContainer" class="space-y-4"></div>
+    <!-- Results -->
+    <div class="mt-6 space-y-4">
+      <div id="loadingMessage" class="hidden flex items-center gap-3 bg-white dark:bg-gray-800 p-6 rounded-xl card-shadow">
+        <div class="loading-spinner"></div>
+        <span class="font-medium">Generating project ideas...</span>
       </div>
+      <div id="errorMessage" class="hidden bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 p-4 rounded-lg"></div>
+
+      <!-- Tabs -->
+      <div id="tabsContainer"></div>
+      <div id="resultsWrapper"></div>
     </div>
   </div>
 
-  <script>
-    class AIIdeationTool {
-      constructor() {
-        this.apiKey = '';
-        this.model = 'gpt-4o-mini';
-        this.projects = [];
-        this.setupListeners();
-      }
+<script>
+function toggleCollapse(contentId, iconId){
+  const content = document.getElementById(contentId);
+  const icon = document.getElementById(iconId);
+  if(content.classList.contains('hidden')){
+    content.classList.remove('hidden');
+    icon.className = 'fas fa-chevron-up';
+  } else {
+    content.classList.add('hidden');
+    icon.className = 'fas fa-chevron-down';
+  }
+}
 
-      setupListeners() {
-        document.getElementById('generateBtn').addEventListener('click', () => this.generateProjects());
-        document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
-        document.getElementById('aiModel').addEventListener('change', e=>this.model=e.target.value);
+class AIIdeationTool {
+  constructor() {
+    this.apiKey = '';
+    this.model = 'gpt-4o-mini';
+    this.projects = [];
+    this.tabCount = 0;
+    this.setupListeners();
+  }
 
-        ['innovation','techSkill','resources','timeline','price','market'].forEach(id=>{
-          document.getElementById(id).addEventListener('input', e=>{
-            document.getElementById(id+'Val').textContent=e.target.value;
-          });
-        });
-      }
+  setupListeners() {
+    document.getElementById('generateBtn').addEventListener('click', () => this.generateProjects());
+    document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
+    document.getElementById('aiModel').addEventListener('change', e => this.model = e.target.value);
+    ['innovation','techSkill','resources','timeline','price','market'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', e=>{
+        document.getElementById(id+'Val').textContent = e.target.value;
+      });
+    });
+  }
 
-      async generateProjects() {
-        this.apiKey = document.getElementById('apiKey').value.trim();
-        if (!this.apiKey) { alert("Enter OpenAI API key"); return; }
+  getRandomColor(){ return `hsl(${Math.floor(Math.random()*360)},70%,45%)`; }
 
-        this.showLoading();
-        this.projects = [];
-        const tech = document.getElementById('techSelect').value;
+  async generateProjects() {
+    this.apiKey = document.getElementById('apiKey').value.trim();
+    if (!this.apiKey) { alert("Enter OpenAI API key"); return; }
+    this.showLoading();
+    this.projects = [];
+    const context = document.getElementById('topicContext').value;
+    const tech = document.getElementById('techSelect').value;
+    const weights = {
+      Innovation: document.getElementById('innovation').value,
+      TechSkill: document.getElementById('techSkill').value,
+      Resources: document.getElementById('resources').value,
+      Timeline: document.getElementById('timeline').value,
+      Price: document.getElementById('price').value,
+      Market: document.getElementById('market').value
+    };
 
-        const weights = {
-          Innovation: document.getElementById('innovation').value,
-          TechSkill: document.getElementById('techSkill').value,
-          Resources: document.getElementById('resources').value,
-          Timeline: document.getElementById('timeline').value,
-          Price: document.getElementById('price').value,
-          Market: document.getElementById('market').value
-        };
-
-        const prompt = `Generate exactly 3 senior design project ideas as a valid JSON array.
+    const prompt = `Generate exactly 3 senior design project ideas as a valid JSON array.
 Each project must have: title, subtitle, categories:
-Description, Estimated cost, Key components, Technologies, Coding Languages, Timeline, Market appeal, Challenges, Unique value.
+Description, Project Plan, Estimated cost, Key components, Technologies, Coding Languages, Timeline, Market appeal, Challenges, Unique value.
 Tailor projects to match these weight preferences (1=low,10=high):
 Innovation: ${weights.Innovation},
 Tech Skill: ${weights.TechSkill},
@@ -172,140 +223,159 @@ Resources: ${weights.Resources},
 Timeline Speed: ${weights.Timeline},
 Price: ${weights.Price},
 Market Strength: ${weights.Market}.
-Use the selected technology if provided: ${tech}.
-`;
+Take the topic context into consideration if provided: ${context}.
+Use the selected technology if provided: ${tech}.`;
 
-        try {
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: this.model,
-              messages: [
-                { role: 'system', content: 'You are a JSON generator that outputs only valid JSON arrays, no extra text.' },
-                { role: 'user', content: prompt }
-              ],
-              temperature: 0.5,
-              max_tokens: 1800
-            })
-          });
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model:this.model, messages:[{role:'system',content:'You are a JSON generator that outputs only valid JSON arrays, no extra text.'},{role:'user',content:prompt}], temperature:0.5, max_tokens:1800 })
+      });
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      let parsed;
+      try{ parsed = JSON.parse(data.choices[0].message.content); } catch { throw new Error("Could not parse JSON response"); }
+      this.projects = parsed.slice(0,3);
+      this.tabCount++;
+      const tabId = "tab"+this.tabCount;
+      this.addTab(tabId,"Set "+this.tabCount);
+      this.renderProjects(weights,tabId);
+    } catch(err){ this.showError("Error: "+err.message); }
+    finally { this.hideLoading(); }
+  }
 
-          if (!res.ok) throw new Error(await res.text());
-          const data = await res.json();
-          const text = data.choices[0].message.content;
+  addTab(tabId,label){
+    const tabsContainer = document.getElementById('tabsContainer');
+    const tab = document.createElement('div');
+    tab.className="tab";
+    tab.dataset.tab = tabId;
+    tab.innerHTML = `${label} <span class="close-btn">&times;</span>`;
+    tabsContainer.appendChild(tab);
+    tabsContainer.scrollLeft = tabsContainer.scrollWidth; // auto scroll
 
-          let parsed;
-          try { parsed = JSON.parse(text); }
-          catch { throw new Error("Could not parse JSON response"); }
+    const resultsWrapper = document.getElementById('resultsWrapper');
+    const resultsDiv = document.createElement('div');
+    resultsDiv.id = tabId;
+    resultsDiv.className="tabContent hidden";
+    resultsWrapper.appendChild(resultsDiv);
+    this.activateTab(tabId);
 
-          this.projects = parsed.slice(0,3);
-          this.renderProjects(weights);
-        } catch(err) {
-          this.showError("Error: " + err.message);
-        } finally {
-          this.hideLoading();
-        }
-      }
+    tab.addEventListener('click', e=>{
+      if(e.target.classList.contains('close-btn')){
+        resultsDiv.remove(); tab.remove();
+        const firstTab = document.querySelector('#tabsContainer .tab');
+        if(firstTab) this.activateTab(firstTab.dataset.tab);
+      } else { this.activateTab(tabId); }
+    });
+  }
 
-      renderProjects(weights) {
-        const container=document.getElementById('resultsContainer');
-        container.innerHTML='';
-        const icons = {
-          'Description':'fas fa-align-left',
-          'Estimated cost':'fas fa-dollar-sign',
-          'Key components':'fas fa-cogs',
-          'Technologies':'fas fa-microchip',
-          'Coding Languages':'fas fa-code',
-          'Timeline':'fas fa-clock',
-          'Market appeal':'fas fa-chart-line',
-          'Challenges':'fas fa-exclamation-triangle',
-          'Unique value':'fas fa-star'
-        };
+  activateTab(tabId){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tabContent').forEach(c=>c.classList.add('hidden'));
+    const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+    const content = document.getElementById(tabId);
+    if(tab && content){ tab.classList.add('active'); content.classList.remove('hidden'); }
+  }
 
-        this.projects.forEach(p=>{
-          const card=document.createElement('div');
-          card.className='bg-white p-6 rounded-xl card-shadow project-card';
-          let categoryHtml = '';
-          Object.entries(p.categories).forEach(([cat,content])=>{
-            categoryHtml += `<div class="category"><i class="category-icon ${icons[cat]||'fas fa-tag'}"></i><div><strong>${cat}:</strong> ${this.escapeHtml(content)}</div></div>`;
-          });
+  renderProjects(weights,tabId){
+    const container = document.getElementById(tabId);
+    container.innerHTML='';
+    const icons = {
+      'Description':'fas fa-align-left',
+      'Project Plan': 'fas fa-pencil',
+      'Estimated cost':'fas fa-dollar-sign',
+      'Key components':'fas fa-cogs',
+      'Technologies':'fas fa-microchip',
+      'Coding Languages':'fas fa-code',
+      'Timeline':'fas fa-clock',
+      'Market appeal':'fas fa-chart-line',
+      'Challenges':'fas fa-exclamation-triangle',
+      'Unique value':'fas fa-star'
+    };
+    this.projects.forEach(p=>{
+      const color = this.getRandomColor();
+      const card=document.createElement('div');
+      card.className='p-6 rounded-xl card-shadow project-card mb-4';
+      card.style.borderLeft=`4px solid ${color}`;
+      let categoryHtml='';
+      Object.entries(p.categories).forEach(([cat,content])=>{
+        categoryHtml+=`<div class="category">
+          <i class="category-icon ${icons[cat]||'fas fa-tag'}" style="color:${color}"></i>
+          <div><strong>${cat}:</strong> <p>${this.escapeHtml(content)}</p></div>
+        </div>`;
+      });
+      let tagsHtml = Object.entries(weights).map(([k,v])=>`<span class="tag" style="background:${color}">${k}: ${v}</span>`).join('');
+      card.innerHTML=`<div class="text-xl font-bold mb-1 flex items-center gap-2"><i class="fas fa-lightbulb" style="color:${color};"></i>${this.escapeHtml(p.title)}</div>
+      <div class="text-sm italic text-gray-600 mb-3">${this.escapeHtml(p.subtitle)}</div>
+      <div class="mb-3">${tagsHtml}</div>
+      ${categoryHtml}
+      <button class="mt-3 px-4 py-2 text-white rounded-lg market-btn" style="background:${color}">Show Market Data</button>
+      <div class="market-data hidden p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"></div>`;
+      container.appendChild(card);
 
-          let tagsHtml = Object.entries(weights).map(([k,v])=>
-            `<span class="tag bg-green-600">${k}: ${v}</span>`
-          ).join('');
-
-          card.innerHTML=`
-            <div class="text-xl font-bold mb-1 flex items-center gap-2">
-              <i class="fas fa-lightbulb text-green-600"></i>${this.escapeHtml(p.title)}
-            </div>
-            <div class="text-sm italic text-gray-600 mb-3">${this.escapeHtml(p.subtitle)}</div>
-            <div class="mb-3">${tagsHtml}</div>
-            ${categoryHtml}
-            <button class="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 market-btn">Show Market Data</button>
-            <div class="market-data hidden mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200"></div>
-          `;
-          container.appendChild(card);
-
-          const marketBtn = card.querySelector('.market-btn');
-          const marketDiv = card.querySelector('.market-data');
-          marketBtn.addEventListener('click', async ()=>{
-            if(!this.apiKey){ alert("Enter API key"); return; }
-            if(!marketDiv.classList.contains('hidden')){ marketDiv.classList.add('hidden'); return; }
-            marketDiv.classList.remove('hidden');
-            marketDiv.textContent='Fetching market data...';
-
-            try{
-              const prompt=`Provide a concise market analysis for this project:
+      const marketBtn = card.querySelector('.market-btn');
+      const marketDiv = card.querySelector('.market-data');
+      marketBtn.addEventListener('click', async ()=>{
+        if(!this.apiKey){ alert("Enter API key"); return; }
+        if(!marketDiv.classList.contains('hidden')){ marketDiv.classList.add('hidden'); return; }
+        marketDiv.classList.remove('hidden');
+        marketDiv.innerHTML = '<div class="loading-spinner"></div> Fetching market data...';
+        try{
+          const prompt=`Provide a concise market analysis for this project as JSON with keys:
+Top competitors, Target users, Market size, Risks.
 Title: ${p.title}
 Subtitle: ${p.subtitle}
 Description: ${p.categories.Description}
-Estimated cost: ${p.categories['Estimated cost']}
+Project Plan: ${p.categories['Project Plan']}
 Technologies: ${p.categories.Technologies}
 Coding Languages: ${p.categories['Coding Languages']}
-Key components: ${p.categories['Key components']}
-Timeline: ${p.categories.Timeline}
-Market appeal: ${p.categories['Market appeal']}
-Challenges: ${p.categories.Challenges}
-Unique value: ${p.categories['Unique value']}
-Include: Top competitors, target users, and risks.
-Return plain text.`;
-
-              const res = await fetch('https://api.openai.com/v1/chat/completions',{
-                method:'POST',
-                headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},
-                body:JSON.stringify({model:this.model,messages:[{role:'user',content:prompt}],temperature:0.6,max_tokens:400})
-              });
-              if(!res.ok){ throw new Error(await res.text()); }
-              const data = await res.json();
-              marketDiv.textContent = data.choices[0].message.content || 'No analysis returned.';
-            } catch(err){ marketDiv.textContent='Error: '+err.message; }
+Estimated cost: ${p.categories['Estimated cost']}
+Return only valid JSON.`;
+          const res = await fetch('https://api.openai.com/v1/chat/completions',{
+            method:'POST',
+            headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},
+            body:JSON.stringify({model:this.model,messages:[{role:'user',content:prompt}],temperature:0.6,max_tokens:400})
           });
-        });
-      }
+          if(!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          let raw = data.choices[0].message.content;
+          let jsonMatch = raw.match(/\{[\s\S]*\}/);
+          if(!jsonMatch) throw new Error("No valid JSON found in response.");
+          let analysis = JSON.parse(jsonMatch[0]);
+          const marketIcons = {'Top competitors':'fas fa-building','Target users':'fas fa-users','Market size':'fas fa-chart-bar','Risks':'fas fa-exclamation-triangle'};
+          let html='';
+          Object.entries(analysis).forEach(([key,value])=>{
+            html+=`<div class="category"><i class="category-icon ${marketIcons[key]||'fas fa-tag'}" style="color:${color}"></i><div><strong>${key}:</strong> <p>${this.escapeHtml(value)}</p></div></div>`;
+          });
+          marketDiv.innerHTML = html;
+        } catch(err){ marketDiv.textContent='Error: '+err.message; }
+      });
+    });
+  }
 
-      escapeHtml(input){
-        let str;
-        if (typeof input === 'string') str = input;
-        else if (Array.isArray(input)) str = input.join(', ');
-        else if (typeof input === 'object' && input !== null) str = JSON.stringify(input);
-        else str = String(input);
-        return str.replace(/[&<>"'`]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','`':'&#96;'}[s]));
-      }
+  escapeHtml(input){
+    let str;
+    if (typeof input === 'string') str = input;
+    else if (Array.isArray(input)) str = input.join(', ');
+    else if (typeof input === 'object' && input !== null) str = JSON.stringify(input);
+    else str = String(input);
+    return str.replace(/[&<>"'`]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','`':'&#96;'}[s]));
+  }
 
-      showLoading(){ document.getElementById('loadingMessage').classList.remove('hidden'); }
-      hideLoading(){ document.getElementById('loadingMessage').classList.add('hidden'); }
-      showError(msg){ const e=document.getElementById('errorMessage'); e.textContent=msg; e.classList.remove('hidden'); }
-      clearAll(){
-        document.getElementById('apiKey').value=''; this.apiKey='';
-        document.getElementById('topicContext').value='';
-        document.getElementById('techSelect').selectedIndex=0;
-        document.getElementById('aiModel').selectedIndex=0;
-        document.getElementById('resultsContainer').innerHTML='';
-        document.getElementById('errorMessage').classList.add('hidden');
-      }
-    }
+  showLoading(){ document.getElementById('loadingMessage').classList.remove('hidden'); }
+  hideLoading(){ document.getElementById('loadingMessage').classList.add('hidden'); }
+  showError(msg){ const e=document.getElementById('errorMessage'); e.textContent=msg; e.classList.remove('hidden'); }
+  clearAll(){
+    document.getElementById('techSelect').selectedIndex=0;
+    document.getElementById('aiModel').selectedIndex=0;
+    document.getElementById('tabsContainer').innerHTML='';
+    document.getElementById('resultsWrapper').innerHTML='';
+    document.getElementById('errorMessage').classList.add('hidden');
+  }
+}
 
-    window.AI_TOOL = new AIIdeationTool();
-  </script>
+window.AI_TOOL = new AIIdeationTool();
+</script>
 </body>
 </html>
