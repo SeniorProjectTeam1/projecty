@@ -54,12 +54,12 @@ body { font-family: 'Inter', sans-serif; }
 <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
 <!-- Header -->
-<div class="flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 md:p-8 rounded-2xl card-shadow">
+<div class="flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-blue-600 to-green-600 text-white p-6 md:p-8 rounded-2xl card-shadow">
   <div class="flex items-center space-x-4">
     <i class="fas fa-smile text-3xl" style="color:yellow;"></i>
     <h1 class="text-3xl md:text-4xl font-bold">
       Projecty 
-      <p class="text-center text-sm md:text-base opacity-90">Project Recommendation Engine for Capstone Topics. Yay!</p>
+      <p class="text-center text-sm md:text-base opacity-90">Project Recommendation Engine for Capstone Topics</p>
     </h1>
   </div>
 </div>
@@ -74,7 +74,7 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div id="configContent" class="bg-white dark:bg-gray-800 p-6 rounded-xl card-shadow mt-2 space-y-3">
       <label class="text-sm font-medium">OpenAI API Key</label>
-      <input id="apiKey" type="password" placeholder="sk-..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+      <input id="apiKey" type="password" placeholder="Token" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
 
       <label class="text-sm font-medium">Preferred Technologies</label>
       <select id="techSelect" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -89,9 +89,9 @@ body { font-family: 'Inter', sans-serif; }
 
       <label class="text-sm font-medium">Model</label>
       <select id="aiModel" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <option value="gpt-4">gpt-4</option>
         <option value="gpt-4o-mini">gpt-4o-mini</option>
         <option value="gpt-4o">gpt-4o</option>
-        <option value="gpt-4">gpt-4</option>
         <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
       </select>
     </div>
@@ -105,7 +105,12 @@ body { font-family: 'Inter', sans-serif; }
     </div>
     <div id="paramsContent" class="bg-white dark:bg-gray-800 p-6 rounded-xl card-shadow mt-2 space-y-3">
       <label class="text-sm font-medium">Topic context (optional)</label>
-      <textarea id="topicContext" rows="2" placeholder="Extra constraints or context" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+      <div class="flex gap-2">
+        <textarea id="topicContext" rows="2" placeholder="Extra context" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+        <button id="sttBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex-shrink-0">
+          <i class="fas fa-microphone"></i>
+        </button>
+      </div>
 
       <div class="space-y-3">
         <div>
@@ -113,7 +118,7 @@ body { font-family: 'Inter', sans-serif; }
           <input id="innovation" type="range" min="1" max="10" value="5" class="w-full innovation-slider">
         </div>
         <div>
-          <label class="block text-sm">Tech Skill <span id="techVal" class="font-bold">5</span></label>
+          <label class="block text-sm">Tech Skill <span id="techSkill" class="font-bold">5</span></label>
           <input id="techSkill" type="range" min="1" max="10" value="5" class="w-full innovation-slider">
         </div>
         <div>
@@ -171,10 +176,11 @@ function toggleCollapse(contentId, iconId){
   }
 }
 
+// Full AIIdeationTool class including all original methods, sliders, TTS/STT, tabs, market/refine buttons
 class AIIdeationTool {
   constructor() {
     this.apiKey = '';
-    this.model = 'gpt-4o-mini';
+    this.model = 'gpt-4';
     this.projects = [];
     this.tabCount = 0;
     this.setupListeners();
@@ -189,7 +195,66 @@ class AIIdeationTool {
         document.getElementById(id+'Val').textContent = e.target.value;
       });
     });
+
+
+
+// STT
+const sttBtn = document.getElementById('sttBtn');
+let recognizing = false;
+let recognition;
+
+sttBtn.addEventListener('click', () => {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert("Speech Recognition not supported in this browser.");
+    return;
   }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+recognition.onresult = (event) => {
+  let finalTranscript = '';
+  let interimTranscript = '';
+
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const transcript = event.results[i][0].transcript;
+    if (event.results[i].isFinal) {
+      finalTranscript += transcript + ' ';
+    } else {
+      interimTranscript += transcript;
+    }
+  }
+
+  // Trim and set only the current final + interim transcript
+  document.getElementById('topicContext').value = (finalTranscript + interimTranscript).trim();
+};
+
+    recognition.onerror = (err) => {
+      console.error(err);
+      alert("Speech recognition error: " + err.message);
+    };
+
+    recognition.onend = () => {
+      recognizing = false;
+      sttBtn.classList.remove('bg-green-600');
+      sttBtn.classList.add('bg-purple-600');
+    };
+  }
+
+  if (!recognizing) {
+    recognition.start(); // triggers mic permission prompt
+    recognizing = true;
+    sttBtn.classList.remove('bg-purple-600');
+    sttBtn.classList.add('bg-green-600');
+  } else {
+    recognition.stop();
+  }
+});
+}
 
   getRandomColor(){ return `hsl(${Math.floor(Math.random()*360)},70%,45%)`; }
 
@@ -274,61 +339,56 @@ Use the selected technology if provided: ${tech}.`;
     if(tab && content){ tab.classList.add('active'); content.classList.remove('hidden'); }
   }
 
-renderProjects(weights,tabId){
-  const container = document.getElementById(tabId);
-  container.innerHTML='';
-  const icons = {
-    'Description':'fas fa-align-left','Project Plan': 'fas fa-pencil','Estimated cost':'fas fa-dollar-sign',
-    'Key components':'fas fa-cogs','Technologies':'fas fa-microchip','Coding Languages':'fas fa-code',
-    'Timeline':'fas fa-clock','Market appeal':'fas fa-chart-line','Challenges':'fas fa-exclamation-triangle','Unique value':'fas fa-star'
-  };
+  // Full renderProjects logic with market/refine functionality, exactly as in original
+  renderProjects(weights,tabId){
+    const container = document.getElementById(tabId);
+    container.innerHTML='';
+    const icons = {
+      'Description':'fas fa-align-left','Project Plan': 'fas fa-pencil','Estimated cost':'fas fa-dollar-sign',
+      'Key components':'fas fa-cogs','Technologies':'fas fa-microchip','Coding Languages':'fas fa-code',
+      'Timeline':'fas fa-clock','Market appeal':'fas fa-chart-line','Challenges':'fas fa-exclamation-triangle','Unique value':'fas fa-star'
+    };
 
-  this.projects.forEach((p,index)=>{
-    const color = this.getRandomColor();
-    const card=document.createElement('div');
-    card.className='p-6 rounded-xl card-shadow project-card mb-4';
-    card.style.borderLeft=`4px solid ${color}`;
+    this.projects.forEach((p,index)=>{
+      const color = this.getRandomColor();
+      const card=document.createElement('div');
+      card.className='p-6 rounded-xl card-shadow project-card mb-4';
+      card.style.borderLeft=`4px solid ${color}`;
 
-    // Create collapsible header
-    const header = document.createElement('div');
-    header.className = 'flex justify-between items-center cursor-pointer mb-3';
-    header.innerHTML = `<div class="text-xl font-bold flex items-center gap-2"><i class="fas fa-lightbulb" style="color:${color};"></i>${this.escapeHtml(p.title)}</div>
-                        <i class="fas fa-chevron-up toggle-icon"></i>`;
-    card.appendChild(header);
+      const header = document.createElement('div');
+      header.className = 'flex justify-between items-center cursor-pointer mb-3';
+      header.innerHTML = `<div class="text-xl font-bold flex items-center gap-2"><i class="fas fa-lightbulb" style="color:${color};"></i>${this.escapeHtml(p.title)}</div>
+                          <i class="fas fa-chevron-up toggle-icon"></i>`;
+      card.appendChild(header);
 
-    // Create collapsible content div
-    const contentDiv = document.createElement('div');
+      const contentDiv = document.createElement('div');
+      let categoryHtml='';
+      Object.entries(p.categories).forEach(([cat,content])=>{
+        categoryHtml+=`<div class="category">
+          <i class="category-icon ${icons[cat]||'fas fa-tag'}" style="color:${color}"></i>
+          <div><strong>${cat}:</strong> <p>${this.escapeHtml(content)}</p></div>
+        </div>`;
+      });
+      let tagsHtml = Object.entries(weights).map(([k,v])=>`<span class="tag" style="background:${color}">${k}: ${v}</span>`).join('');
+      contentDiv.innerHTML=`<div class="text-sm italic text-gray-600 mb-3">${this.escapeHtml(p.subtitle)}</div>
+      <div class="mb-3">${tagsHtml}</div>
+      ${categoryHtml}
+      <div class="flex gap-2 mt-3">
+        <button class="px-4 py-2 text-white rounded-lg market-btn" style="background:${color}">Show Market Data</button>
+        <button class="px-4 py-2 text-white rounded-lg refine-btn" style="background:${color}">Refine Idea</button>
+      </div>
+      <div class="market-data hidden p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-2"></div>
+      <div class="refine-data hidden p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-2"></div>`;
+      card.appendChild(contentDiv);
+      container.appendChild(card);
 
-    let categoryHtml='';
-    Object.entries(p.categories).forEach(([cat,content])=>{
-      categoryHtml+=`<div class="category">
-        <i class="category-icon ${icons[cat]||'fas fa-tag'}" style="color:${color}"></i>
-        <div><strong>${cat}:</strong> <p>${this.escapeHtml(content)}</p></div>
-      </div>`;
-    });
+      header.addEventListener('click', ()=>{
+        contentDiv.classList.toggle('hidden');
+        const icon = header.querySelector('.toggle-icon');
+        if(contentDiv.classList.contains('hidden')) icon.className = 'fas fa-chevron-down toggle-icon';
+        else icon.className = 'fas fa-chevron-up toggle-icon';
+      });
 
-    let tagsHtml = Object.entries(weights).map(([k,v])=>`<span class="tag" style="background:${color}">${k}: ${v}</span>`).join('');
-
-    contentDiv.innerHTML=`<div class="text-sm italic text-gray-600 mb-3">${this.escapeHtml(p.subtitle)}</div>
-    <div class="mb-3">${tagsHtml}</div>
-    ${categoryHtml}
-    <div class="flex gap-2 mt-3">
-      <button class="px-4 py-2 text-white rounded-lg market-btn" style="background:${color}">Show Market Data</button>
-      <button class="px-4 py-2 text-white rounded-lg refine-btn" style="background:${color}">Refine Idea</button>
-    </div>
-    <div class="market-data hidden p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-2"></div>
-    <div class="refine-data hidden p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-2"></div>`;
-
-    card.appendChild(contentDiv);
-    container.appendChild(card);
-
-    // Collapse/expand logic
-    header.addEventListener('click', ()=>{
-      contentDiv.classList.toggle('hidden');
-      const icon = header.querySelector('.toggle-icon');
-      if(contentDiv.classList.contains('hidden')) icon.className = 'fas fa-chevron-down toggle-icon';
-      else icon.className = 'fas fa-chevron-up toggle-icon';
-    });
       // Market Data Button
       const marketBtn = card.querySelector('.market-btn');
       const marketDiv = card.querySelector('.market-data');
@@ -348,6 +408,7 @@ Technologies: ${p.categories.Technologies}
 Coding Languages: ${p.categories['Coding Languages']}
 Estimated cost: ${p.categories['Estimated cost']}
 Return only valid JSON.`;
+
           const res = await fetch('https://api.openai.com/v1/chat/completions',{
             method:'POST',
             headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},
@@ -369,54 +430,43 @@ Return only valid JSON.`;
       });
 
       // Refine Idea Button
-
-// Refine Idea Button
-const refineBtn = card.querySelector('.refine-btn');
-const refineDiv = card.querySelector('.refine-data');
-refineBtn.addEventListener('click', async ()=>{
-  if(!this.apiKey){ alert("Enter API key"); return; }
-  refineDiv.classList.toggle('hidden');
-  if(refineDiv.classList.contains('hidden')) return;
-  refineDiv.innerHTML = '<div class="loading-spinner"></div> Refining idea...';
-  try{
-    const prompt=`You are given a project idea with the following categories:
+      const refineBtn = card.querySelector('.refine-btn');
+      const refineDiv = card.querySelector('.refine-data');
+      refineBtn.addEventListener('click', async ()=>{
+        if(!this.apiKey){ alert("Enter API key"); return; }
+        refineDiv.classList.toggle('hidden');
+        if(refineDiv.classList.contains('hidden')) return;
+        refineDiv.innerHTML = '<div class="loading-spinner"></div> Refining idea...';
+        try{
+          const prompt=`You are given a project idea with the following categories:
 Description, Project Plan, Estimated cost, Key components, Technologies, Coding Languages, Timeline, Market appeal, Challenges, Unique value.
 
 Here are the current values:
 ${Object.entries(p.categories).map(([cat,val])=>`${cat}: ${val}`).join('\n')}
 
-Refine and expand each category in detail. Return only a **valid JSON object** where keys are the category names and values are the refined content. Do NOT include the project title or subtitle.`;
+Refine and expand each category in detail. Return only a valid JSON object where keys are the category names and values are the refined content. Do NOT include the project title or subtitle.`;
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions',{
-      method:'POST',
-      headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:this.model,
-        messages:[{role:'user',content:prompt}],
-        temperature:0.7,
-        max_tokens:600
-      })
-    });
-    if(!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    const raw = data.choices[0].message.content;
-
-    // Safely extract JSON object from response
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error("No valid JSON found in response.");
-    const refined = JSON.parse(jsonMatch[0]);
-
-    // Render each category individually with colored icons
-    let html='';
-    Object.entries(refined).forEach(([cat,content])=>{
-      html+=`<div class="category">
-        <i class="category-icon ${icons[cat]||'fas fa-tag'}" style="color:${color}"></i>
-        <div><strong>${cat}:</strong> <p>${this.escapeHtml(content)}</p></div>
-      </div>`;
-    });
-    refineDiv.innerHTML = html;
-  } catch(err){ refineDiv.textContent='Error: '+err.message; }
-});
+          const res = await fetch('https://api.openai.com/v1/chat/completions',{
+            method:'POST',
+            headers:{ 'Authorization':`Bearer ${this.apiKey}`, 'Content-Type':'application/json'},
+            body:JSON.stringify({model:this.model,messages:[{role:'user',content:prompt}],temperature:0.7,max_tokens:600})
+          });
+          if(!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          const raw = data.choices[0].message.content;
+          const jsonMatch = raw.match(/\{[\s\S]*\}/);
+          if(!jsonMatch) throw new Error("No valid JSON found in response.");
+          const refined = JSON.parse(jsonMatch[0]);
+          let html='';
+          Object.entries(refined).forEach(([cat,content])=>{
+            html+=`<div class="category">
+              <i class="category-icon ${icons[cat]||'fas fa-tag'}" style="color:${color}"></i>
+              <div><strong>${cat}:</strong> <p>${this.escapeHtml(content)}</p></div>
+            </div>`;
+          });
+          refineDiv.innerHTML = html;
+        } catch(err){ refineDiv.textContent='Error: '+err.message; }
+      });
 
     });
   }
