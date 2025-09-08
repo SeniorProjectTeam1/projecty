@@ -59,7 +59,7 @@ body { font-family: 'Inter', sans-serif; }
     <i class="fas fa-smile text-3xl" style="color:yellow;"></i>
     <h1 class="text-3xl md:text-4xl font-bold">
       Projecty 
-      <p class="text-center text-sm md:text-base opacity-90">Project Recommendation Engine for Capstone Topics</p>
+      <p class="text-center text-sm md:text-base opacity-90">Project Recommendation Engine for Capstone Topics, Yay!</p>
     </h1>
   </div>
 </div>
@@ -107,7 +107,7 @@ body { font-family: 'Inter', sans-serif; }
       <label class="text-sm font-medium">Topic context (optional)</label>
       <div class="flex gap-2">
         <textarea id="topicContext" rows="2" placeholder="Extra context" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
-        <button id="sttBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex-shrink-0">
+        <button id="sttBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex-shrink-0">
           <i class="fas fa-microphone"></i>
         </button>
       </div>
@@ -240,16 +240,16 @@ recognition.onresult = (event) => {
 
     recognition.onend = () => {
       recognizing = false;
-      sttBtn.classList.remove('bg-green-600');
-      sttBtn.classList.add('bg-purple-600');
+      sttBtn.classList.remove('bg-red-600');
+      sttBtn.classList.add('bg-green-600');
     };
   }
 
   if (!recognizing) {
     recognition.start(); // triggers mic permission prompt
     recognizing = true;
-    sttBtn.classList.remove('bg-purple-600');
-    sttBtn.classList.add('bg-green-600');
+    sttBtn.classList.remove('bg-green-600');
+    sttBtn.classList.add('bg-red-600');
   } else {
     recognition.stop();
   }
@@ -258,7 +258,7 @@ recognition.onresult = (event) => {
 
   getRandomColor(){ return `hsl(${Math.floor(Math.random()*360)},70%,45%)`; }
 
-  async generateProjects() {
+async generateProjects() {
     this.apiKey = document.getElementById('apiKey').value.trim();
     if (!this.apiKey) { alert("Enter OpenAI API key"); return; }
     this.showLoading();
@@ -287,24 +287,49 @@ Market Strength: ${weights.Market}.
 Take the topic context into consideration if provided: ${context}.
 Use the selected technology if provided: ${tech}.`;
 
-    try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model:this.model, messages:[{role:'system',content:'You are a JSON generator that outputs only valid JSON arrays, no extra text.'},{role:'user',content:prompt}], temperature:0.5, max_tokens:1800 })
-      });
-      if(!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      let parsed;
-      try{ parsed = JSON.parse(data.choices[0].message.content); } catch { throw new Error("Could not parse JSON response"); }
-      this.projects = parsed.slice(0,3);
-      this.tabCount++;
-      const tabId = "tab"+this.tabCount;
-      this.addTab(tabId," Project Set "+this.tabCount);
-      this.renderProjects(weights,tabId);
-    } catch(err){ this.showError("Error: "+err.message); }
-    finally { this.hideLoading(); }
-  }
+    let attempts = 0;
+    const maxRetries = 3;
+    let parsed;
+
+    while (attempts < maxRetries) {
+      attempts++;
+      try {
+        document.getElementById('loadingMessage').querySelector('span').textContent = `Generating project ideas... Attempt ${attempts}`;
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: this.model,
+            messages: [
+              { role: 'system', content: 'You are a JSON generator that outputs only valid JSON arrays, no extra text.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.5,
+            max_tokens: 1800
+          })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        parsed = JSON.parse(data.choices[0].message.content);
+        break; // success
+      } catch (err) {
+        if (attempts >= maxRetries) {
+          this.showError("Failed after multiple attempts: " + err.message);
+          this.hideLoading();
+          return;
+        }
+        console.warn(`Attempt ${attempts} failed, retrying...`, err);
+      }
+    }
+
+    this.projects = parsed.slice(0, 3);
+    this.tabCount++;
+    const tabId = "tab" + this.tabCount;
+    this.addTab(tabId, " Project Set " + this.tabCount);
+    this.renderProjects(weights, tabId);
+    this.hideLoading();
+}
+
 
   addTab(tabId,label){
     const tabsContainer = document.getElementById('tabsContainer');
